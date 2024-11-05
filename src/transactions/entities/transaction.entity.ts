@@ -16,11 +16,14 @@ export class Transactions {
     paymentType: string;
 
     @Column()
+    paymentId: string;
+
+    @Column()
     amount: number;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     date: Date;
 
-    @Column()
-    comission: number;
+    @Column({type: 'decimal', precision: 10, scale: 4})
+    netAmount: number;
 }

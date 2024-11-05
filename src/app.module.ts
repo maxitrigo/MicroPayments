@@ -4,6 +4,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { DatabaseModule } from './database/database.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from './config/env.config';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JWT_SECRET } from './config/env.config';
       secret: JWT_SECRET,
       signOptions: { expiresIn: '1h' },
     }),
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

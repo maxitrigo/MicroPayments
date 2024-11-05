@@ -2,17 +2,17 @@ import { Controller, Get, Post, Body, Patch, Param, UseGuards, Headers, Query } 
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Create a product' })
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Create a transaction' })
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Forbidden.' })
   @ApiBearerAuth()
@@ -28,6 +28,16 @@ export class TransactionsController {
   @ApiBearerAuth()
   findAll(@Headers('authorization') headers: string) {
     return this.transactionsService.findAll();
+  }
+
+  @Get('paymentId')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Get all transactions by client ' })
+  @ApiResponse({ status: 201, description: 'Transaction successfully retrieved.' })
+  @ApiResponse({ status: 400, description: 'Forbidden.' })
+  @ApiBearerAuth()
+  findByPaymentId(@Body('paymentId') paymentId: string, @Headers('authorization') headers: string) {
+    return this.transactionsService.findByPaymentId(paymentId);
   }
 
   @Get('userId')

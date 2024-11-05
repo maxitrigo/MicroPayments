@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionsRepository } from './transactions.repository';
@@ -23,6 +23,21 @@ export class TransactionsService {
     const decoded = this.jwtService.decode(token);
     const clientId = decoded.id
     return await this.transactionsRepository.findByClientId(clientId);
+  }
+
+  async findByPaymentId(paymentId: string) {
+    if (!paymentId) {
+      throw new BadRequestException('Payment ID is required');
+    }
+
+    const existingTransaction = await this.transactionsRepository.findByPaymentId(paymentId);
+
+    if(!existingTransaction) {
+      throw new BadRequestException('Payment ID not found');
+    }
+
+    return existingTransaction
+
   }
 
   async findByProductId(productId: string) {

@@ -17,11 +17,15 @@ export class CreateTransactionDto {
     @IsString()
     paymentType: string;
 
+    @ApiProperty({ example: '1kjb123nk23' })
+    @IsString()
+    paymentId: string;
+
     @ApiProperty({ example: 100 })
     @IsString()
     amount: number;
 
     @ApiProperty({ example: 10 })
     @IsString()
-    comission: number;
+    netAmount: number;
 }

@@ -19,6 +19,10 @@ export class TransactionsRepository {
         return await this.transactionsRepository.findOneBy({clientId});
     }
 
+    async findByPaymentId(paymentId: string) {
+        return await this.transactionsRepository.findOneBy({paymentId});
+    }
+
     async findByProductId(productId: string) {
         return await this.transactionsRepository.findOneBy({productId});
     }
