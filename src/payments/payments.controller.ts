@@ -42,7 +42,7 @@ export class PaymentsController {
 
    this.paymentsService.handlePaymentSuccess(externalReference, paymentId);
 
-    const redirecUrl = 'https://yochambeo.com'
+    const redirecUrl = 'TU URL DE REDIRECCIONAMIENTO';
     res.redirect(redirecUrl);
 
   }
