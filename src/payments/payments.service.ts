@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import MercadoPagoConfig, { Preference } from 'mercadopago';
@@ -6,6 +6,7 @@ import { MERCADOPAGO_ACCESS_TOKEN } from 'src/config/env.config';
 import { JwtService } from '@nestjs/jwt';
 import { TransactionsService } from 'src/transactions/transactions.service';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PaymentsService {
@@ -36,7 +37,7 @@ export class PaymentsService {
       body: {
         items: [
           {
-            id: createPaymentDto.id,
+            id: uuidv4(),
             title: createPaymentDto.title,
             description: createPaymentDto.description,
             quantity: createPaymentDto.quantity,
@@ -69,12 +70,16 @@ export class PaymentsService {
   }
 
   async handlePaymentSuccess(externalReference: string, paymentId: string) {
-
+    
+    const decoded = this.jwtService.decode(externalReference)
+    const clientId = decoded.clientId
+    const productId = decoded.productId
+    
+    if(!decoded){
+      throw new UnauthorizedException('Unauthorized payment');
+    }
+    
     const verification = await axios.get(`https://api.mercadopago.com/v1/payments/${paymentId}?access_token=${MERCADOPAGO_ACCESS_TOKEN}`)
-
-    const decode = this.jwtService.decode(externalReference)
-    const clientId = decode.clientId
-    const productId = decode.productId
 
     const netReceivedAmount = verification.data.transaction_details.net_received_amount
     const totalPaidAmount = verification.data.transaction_details.total_paid_amount

@@ -4,6 +4,7 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Headers } from '@nestjs/common';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { Response } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 
 @Controller('payments')
@@ -14,6 +15,10 @@ export class PaymentsController {
 
   @Post()
   @UseGuards(AuthGuard)
+  @ApiOperation({summary: 'Create payment'})
+  @ApiResponse({status: 201, description: 'Payment created'})
+  @ApiResponse({status: 400, description: 'Bad Request'})
+  @ApiBearerAuth()
   create(@Body() createPaymentDto: CreatePaymentDto, @Headers('authorization') headers: string) {
     const token = headers.split(' ')[1];
     return this.paymentsService.create(createPaymentDto, token);
