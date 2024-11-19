@@ -26,4 +26,7 @@ export class Transactions {
 
     @Column({type: 'decimal', precision: 10, scale: 4})
     netAmount: number;
+
+    @Column()
+    gymId: string
 }

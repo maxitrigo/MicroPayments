@@ -19,6 +19,12 @@ export class TransactionsService {
     return await this.transactionsRepository.findAll();
   }
 
+  async findByGymId(gymToken: string) {
+    const decoded = this.jwtService.decode(gymToken);
+    const gymId = decoded.id
+    return await this.transactionsRepository.findByGymId(gymId);
+  }
+
   async findByClientId(token: string) {
     const decoded = this.jwtService.decode(token);
     const clientId = decoded.id
@@ -58,6 +64,12 @@ export class TransactionsService {
 
   async update(id: string, updateTransactionDto: UpdateTransactionDto) {
     return `This action updates a #${id} transaction`;
+  }
+
+  async remove(id: string, gymToken: string) {
+    const decoded = this.jwtService.decode(gymToken);
+    const gymId = decoded.id
+    return await this.transactionsRepository.remove(id, gymId);
   }
 
 }

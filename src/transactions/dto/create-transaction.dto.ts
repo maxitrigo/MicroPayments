@@ -28,4 +28,8 @@ export class CreateTransactionDto {
     @ApiProperty({ example: 10 })
     @IsString()
     netAmount: number;
+
+    @ApiProperty({ example: '312308-1234-1234-1234' })
+    @IsString()
+    gymId: string
 }

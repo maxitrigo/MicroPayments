@@ -9,10 +9,15 @@ import { CreateTransactionDto } from "./dto/create-transaction.dto";
 export class TransactionsRepository {
     constructor(
         @InjectRepository(Transactions) private readonly transactionsRepository: Repository<Transactions>,
+
     ) {}
 
     async findAll() {
         return await this.transactionsRepository.find();
+    }
+
+    async findByGymId (gymId: string) {
+        return await this.transactionsRepository.findBy({gymId});
     }
 
     async findByClientId(clientId: string) {
@@ -49,6 +54,10 @@ export class TransactionsRepository {
 
     async update(id: string, updateTransactionDto: UpdateTransactionDto) {
         return await this.transactionsRepository.update({ id }, updateTransactionDto);
+    }
+
+    async remove(id: string, gymId: string) {
+        return await this.transactionsRepository.delete({ id, gymId });
     }
 
 }

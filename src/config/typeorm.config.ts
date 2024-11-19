@@ -12,7 +12,7 @@ const config = {
     database: DB_DATABASE_NAME,
     autoLoadEntities: true,
     synchronize: true, // No usar en producción
-    logging: true,
+    logging: false,
     migrationsRun: true,
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations: ['dist/migrations/*{.ts,.js}'],

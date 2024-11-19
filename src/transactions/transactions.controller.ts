@@ -1,14 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, Headers, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Headers, Query, Delete } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('transactions')
 export class TransactionsController {
-  constructor(private readonly transactionsService: TransactionsService) {}
+  constructor(
+    private readonly transactionsService: TransactionsService,
+    private readonly jwtService: JwtService
+  ) {}
 
   @Post()
   @UseGuards(AdminGuard)
@@ -16,7 +20,10 @@ export class TransactionsController {
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Forbidden.' })
   @ApiBearerAuth()
-  create(@Body() createTransactionDto: CreateTransactionDto, @Headers('authorization') headers: string) {
+  create(@Body() Body, @Body('gymToken') gymToken: string, @Headers('authorization') headers: string) {
+    const decoded = this.jwtService.decode(gymToken)
+    const gymId = decoded.id
+    const createTransactionDto: CreateTransactionDto = {...Body, gymId};
     return this.transactionsService.create(createTransactionDto);
   }
 
@@ -29,6 +36,16 @@ export class TransactionsController {
   findAll(@Headers('authorization') headers: string) {
     return this.transactionsService.findAll();
   }
+
+  @Get(':gymToken')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Get all transactions' })
+  @ApiResponse({ status: 201, description: 'Transactions successfully retrieved.' })
+  @ApiResponse({ status: 400, description: 'Forbidden.' })
+  findByGymId(@Param('gymToken') gymToken: string,@Headers('authorization') headers: string) {
+    return this.transactionsService.findByGymId(gymToken);
+  }
+
 
   @Get('paymentId')
   @UseGuards(AuthGuard)
@@ -102,6 +119,16 @@ export class TransactionsController {
   @ApiBearerAuth()
   update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto, @Headers('authorization') headers: string) {
     return this.transactionsService.update(id, updateTransactionDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Delete a transaction' })
+  @ApiResponse({ status: 201, description: 'Transactions successfully deleted.' })
+  @ApiResponse({ status: 400, description: 'Forbidden.' })
+  @ApiBearerAuth()
+  remove(@Param('id') id: string, @Query('gymToken') gymToken: string,@Headers('authorization') headers: string) {
+    return this.transactionsService.remove(id, gymToken);
   }
 
 }

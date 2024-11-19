@@ -17,11 +17,21 @@ export class UpdateTransactionDto extends PartialType(CreateTransactionDto) {
     @IsString()
     paymentType?: string;
 
+    @ApiProperty({ example: '312308-1234-1234-1234' })
+    @IsString()
+    paymentId?: string;
+
     @ApiProperty({ example: 100 })
     @IsString()
     amount?: number;
 
-    @ApiProperty({ example: 10 })
+    @ApiProperty({ example: 100 })
     @IsString()
-    comission?: number;
+    netAmount?: number;
+
+    @ApiProperty({ example: '312308-1234-1234-1234' })
+    @IsString()
+    gymId?: string;
+
+
 }

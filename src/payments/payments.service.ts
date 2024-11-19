@@ -6,7 +6,6 @@ import { MERCADOPAGO_ACCESS_TOKEN } from 'src/config/env.config';
 import { JwtService } from '@nestjs/jwt';
 import { TransactionsService } from 'src/transactions/transactions.service';
 import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PaymentsService {
@@ -16,19 +15,20 @@ export class PaymentsService {
     private readonly transactionsService: TransactionsService
   ) {}
 
-  async create(createPaymentDto: CreatePaymentDto, token: string) {
-
+  async create(createPaymentDto: CreatePaymentDto, token: string, gymToken: string, slug: string) {    
+    const decodedGym = this.jwtService.decode(gymToken);
     const decoded = this.jwtService.decode(token);
     const clientId = decoded.id
     const productId = createPaymentDto.productId
+    const external = `${slug}`
 
-    const payload = this.jwtService.sign({
-      clientId: clientId,
-      productId: productId
-    })
+    
+
+    const MP_ACCESS_TOKEN = decodedGym.mercadopago
     
     const client = new MercadoPagoConfig({
-      accessToken: MERCADOPAGO_ACCESS_TOKEN
+      // accessToken: MERCADOPAGO_ACCESS_TOKEN
+      accessToken: MP_ACCESS_TOKEN
     })
 
     const preference = new Preference(client)
@@ -37,7 +37,7 @@ export class PaymentsService {
       body: {
         items: [
           {
-            id: uuidv4(),
+            id: productId,
             title: createPaymentDto.title,
             description: createPaymentDto.description,
             quantity: createPaymentDto.quantity,
@@ -53,10 +53,14 @@ export class PaymentsService {
           ],
           installments: 1
         },
-        external_reference: payload,
+        metadata: {
+          client_id: clientId,
+          product_id: productId
+        },
+        external_reference: external,
         back_urls: {
           success: 'http://localhost:3000/payments/success',
-          failure: 'http://localhost:3000/failure',
+          failure: `http://localhost:5173/${slug}`,
           pending: 'http://localhost:3000/pending'
         },
         auto_return: 'approved'
@@ -70,16 +74,27 @@ export class PaymentsService {
   }
 
   async handlePaymentSuccess(externalReference: string, paymentId: string) {
-    
-    const decoded = this.jwtService.decode(externalReference)
-    const clientId = decoded.clientId
-    const productId = decoded.productId
-    
-    if(!decoded){
-      throw new UnauthorizedException('Unauthorized payment');
+    const gymSlug = externalReference.split('/')[0]
+    const payload = {
+      slug: gymSlug
     }
-    
-    const verification = await axios.get(`https://api.mercadopago.com/v1/payments/${paymentId}?access_token=${MERCADOPAGO_ACCESS_TOKEN}`)
+    const token = this.jwtService.sign(payload)
+
+    const GYM = await axios.get(`http://localhost:3005/gyms/${gymSlug}`,
+      {
+        headers: {
+          authorization: `Bearer ${token}`
+      }}
+    )
+
+    const gymToken = GYM.data.gymToken
+    const decodedGym = this.jwtService.decode(gymToken);
+    const MP_ACCESS_TOKEN = decodedGym.mercadopago
+
+    const verification = await axios.get(`https://api.mercadopago.com/v1/payments/${paymentId}?access_token=${MP_ACCESS_TOKEN}`)
+
+    const productId = verification.data.metadata.product_id
+    const clientId = verification.data.metadata.client_id
 
     const netReceivedAmount = verification.data.transaction_details.net_received_amount
     const totalPaidAmount = verification.data.transaction_details.total_paid_amount
@@ -91,14 +106,33 @@ export class PaymentsService {
         paymentType: 'mercado_pago',
         paymentId: paymentId,
         amount: totalPaidAmount,
-        netAmount: netReceivedAmount
+        netAmount: netReceivedAmount,
+        gymId: decodedGym.id
       })
+
     }
+
+    const userToken = this.jwtService.sign({
+      clientId: clientId,
+      productId: productId,
+      role: 'admin'
+    })
+    const updateUser = await axios.post(
+      `http://localhost:3005/users/update-subscription`,
+      {},
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`
+        }
+      }
+    )
+
 
     return {
       status: verification.data.status_detail,
       productId: productId,
-      paymentId: paymentId
+      paymentId: paymentId,
+      slug: externalReference
     }
   }
 

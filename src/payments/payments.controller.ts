@@ -13,19 +13,19 @@ export class PaymentsController {
     private readonly paymentsService: PaymentsService
   ) {}
 
-  @Post()
+  @Post('subscriptions')
   @UseGuards(AuthGuard)
   @ApiOperation({summary: 'Create payment'})
   @ApiResponse({status: 201, description: 'Payment created'})
   @ApiResponse({status: 400, description: 'Bad Request'})
   @ApiBearerAuth()
-  create(@Body() createPaymentDto: CreatePaymentDto, @Headers('authorization') headers: string) {
+  create(@Body('payment') createPaymentDto: CreatePaymentDto,@Headers('authorization') headers: string, @Body('gymToken') gymToken: string, @Body('slug') slug: string) {
     const token = headers.split(' ')[1];
-    return this.paymentsService.create(createPaymentDto, token);
+    return this.paymentsService.create(createPaymentDto, token, gymToken, slug);
   }
 
   @Get('success')
-  handlePaymentSuccess(
+  async handlePaymentSuccess(
     @Query('collection_id') collectionId: string,
     @Query('collection_status') collectionStatus: string,
     @Query('payment_id') paymentId: string,
@@ -40,9 +40,9 @@ export class PaymentsController {
     @Res() res: Response
   ) {
 
-   this.paymentsService.handlePaymentSuccess(externalReference, paymentId);
+    const success = await this.paymentsService.handlePaymentSuccess(externalReference, paymentId);
 
-    const redirecUrl = 'TU URL DE REDIRECCIONAMIENTO';
+    const redirecUrl = `http://localhost:5173/${success.slug}`
     res.redirect(redirecUrl);
 
   }
