@@ -22,6 +22,8 @@ export class TransactionsService {
   async findByGymId(gymToken: string) {
     const decoded = this.jwtService.decode(gymToken);
     const gymId = decoded.id
+    console.log(gymId);
+    
     return await this.transactionsRepository.findByGymId(gymId);
   }
 

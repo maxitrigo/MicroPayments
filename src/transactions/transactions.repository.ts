@@ -13,6 +13,8 @@ export class TransactionsRepository {
     ) {}
 
     async findAll() {
+        console.log('pido todo');
+        
         return await this.transactionsRepository.find();
     }
 

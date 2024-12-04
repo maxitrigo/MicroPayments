@@ -14,7 +14,7 @@ import { PaymentsModule } from './payments/payments.module';
     JwtModule.register({
       global: true,
       secret: JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '4h' },
     }),
     PaymentsModule,
   ],
