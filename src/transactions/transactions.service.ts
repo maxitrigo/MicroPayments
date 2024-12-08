@@ -20,10 +20,13 @@ export class TransactionsService {
   }
 
   async findByGymId(gymToken: string) {
-    const decoded = this.jwtService.decode(gymToken);
-    const gymId = decoded.id
-    console.log(gymId);
-    
+    const decodedGym = this.jwtService.decode(gymToken);
+    const gymId = decodedGym.id
+    const currentDate = new Date()
+    const subscriptionEndDate = new Date(decodedGym.subscriptionEnd)
+    if (subscriptionEndDate < currentDate) {
+      throw new BadRequestException('Your subscription has expired');
+    }
     return await this.transactionsRepository.findByGymId(gymId);
   }
 

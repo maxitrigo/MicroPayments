@@ -1,11 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
 import MercadoPagoConfig, { Preference } from 'mercadopago';
 import { MERCADOPAGO_ACCESS_TOKEN } from 'src/config/env.config';
 import { JwtService } from '@nestjs/jwt';
 import { TransactionsService } from 'src/transactions/transactions.service';
 import axios from 'axios';
+import { Roles } from 'src/Roles/roles.enum';
 
 @Injectable()
 export class PaymentsService {
@@ -17,17 +17,70 @@ export class PaymentsService {
 
   async create(createPaymentDto: CreatePaymentDto, token: string, gymToken: string, slug: string) {    
     const decodedGym = this.jwtService.decode(gymToken);
-    const decoded = this.jwtService.decode(token);
-    const clientId = decoded.id
+    const currentDate = new Date()
+    const subscriptionEndDate = new Date(decodedGym.subscriptionEnd)
+    if (subscriptionEndDate < currentDate) {
+      throw new BadRequestException('Your subscription has expired');
+    }
+    const decodedUser = this.jwtService.decode(token);
+    const clientId = decodedUser.id
     const productId = createPaymentDto.productId
     const external = `${slug}`
+
+    console.log(decodedUser);
+    
+    
+    if(decodedUser.role === Roles.Admin) {
+      const client = new MercadoPagoConfig({
+        accessToken: MERCADOPAGO_ACCESS_TOKEN
+      })
+  
+      const preference = new Preference(client)
+  
+      const result = await preference.create({
+        body: {
+          items: [
+            {
+              id: productId,
+              title: createPaymentDto.title,
+              description: createPaymentDto.description,
+              quantity: createPaymentDto.quantity,
+              currency_id: 'UYU',
+              unit_price: createPaymentDto.unit_price
+            }
+          ],
+          payment_methods: {
+            excluded_payment_types: [
+              {
+                id: 'ticket'
+              }
+            ],
+            installments: 1
+          },
+          metadata: {
+            client_id: clientId,
+            product_id: productId
+          },
+          external_reference: external,
+          back_urls: {
+            success: 'http://localhost:3000/payments/successGyms',
+            failure: `http://localhost:5173/${slug}`,
+            pending: 'http://localhost:3000/pending'
+          },
+          auto_return: 'approved'
+        }
+      })
+  
+      const init_point = result.init_point
+  
+      return { init_point }
+    }
 
     
 
     const MP_ACCESS_TOKEN = decodedGym.mercadopago
     
     const client = new MercadoPagoConfig({
-      // accessToken: MERCADOPAGO_ACCESS_TOKEN
       accessToken: MP_ACCESS_TOKEN
     })
 
@@ -136,4 +189,71 @@ export class PaymentsService {
     }
   }
 
+  async handlePaymentSuccessGyms(externalReference: string, paymentId: string) {
+    const gymSlug = externalReference.split('/')[0]
+    const payload = {
+      slug: gymSlug
+    }
+    const token = this.jwtService.sign(payload)
+
+    const GYM = await axios.get(`http://localhost:3005/gyms/${gymSlug}`,
+      {
+        headers: {
+          authorization: `Bearer ${token}`
+      }}
+    )
+
+    const gymToken = GYM.data.gymToken
+    const decodedGym = this.jwtService.decode(gymToken);
+    const MP_ACCESS_TOKEN = MERCADOPAGO_ACCESS_TOKEN
+
+    const verification = await axios.get(`https://api.mercadopago.com/v1/payments/${paymentId}?access_token=${MP_ACCESS_TOKEN}`)
+
+    const productId = verification.data.metadata.product_id
+    const clientId = verification.data.metadata.client_id
+
+    const netReceivedAmount = verification.data.transaction_details.net_received_amount
+    const totalPaidAmount = verification.data.transaction_details.total_paid_amount
+
+    if (verification.data.status_detail === 'accredited'){
+      await this.transactionsService.create({
+        clientId: clientId,
+        productId: productId,
+        paymentType: 'mercado_pago',
+        paymentId: paymentId,
+        amount: totalPaidAmount,
+        netAmount: netReceivedAmount,
+        gymId: decodedGym.id
+      })
+
+    }
+
+    const userToken = this.jwtService.sign({
+      clientId: clientId,
+      gymId: decodedGym.id,
+      productId: productId,
+      role: 'admin'
+    })
+    const updateUser = await axios.post(
+      `http://localhost:3005/gyms/extend-subscription`,
+      {},
+      {
+        headers: {
+          authorization: `Bearer ${userToken}`
+        }
+      }
+    )
+
+
+    return {
+      status: verification.data.status_detail,
+      productId: productId,
+      paymentId: paymentId,
+      slug: externalReference
+    }
+  }
+  
+
 }
+
+

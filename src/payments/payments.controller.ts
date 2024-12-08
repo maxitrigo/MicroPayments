@@ -46,4 +46,27 @@ export class PaymentsController {
     res.redirect(redirecUrl);
 
   }
+
+  @Get('successGyms')
+  async handlePaymentSuccessGyms(
+    @Query('collection_id') collectionId: string,
+    @Query('collection_status') collectionStatus: string,
+    @Query('payment_id') paymentId: string,
+    @Query('status') status: string,
+    @Query('external_reference') externalReference: string,
+    @Query('payment_type') paymentType: string,
+    @Query('merchant_order_id') merchantOrderId: string,
+    @Query('preference_id') preferenceId: string,
+    @Query('site_id') siteId: string,
+    @Query('processing_mode') processingMode: string,
+    @Query('merchant_account_id') merchantAccountId: string,
+    @Res() res: Response
+  ) {
+
+    const success = await this.paymentsService.handlePaymentSuccessGyms(externalReference, paymentId);
+
+    const redirecUrl = `http://localhost:5173/${success.slug}`
+    res.redirect(redirecUrl);
+
+  }
 }
