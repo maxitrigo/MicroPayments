@@ -17,19 +17,16 @@ export class PaymentsService {
 
   async create(createPaymentDto: CreatePaymentDto, token: string, gymToken: string, slug: string) {    
     const decodedGym = this.jwtService.decode(gymToken);
+    const decodedUser = this.jwtService.decode(token);
     const currentDate = new Date()
     const subscriptionEndDate = new Date(decodedGym.subscriptionEnd)
-    if (subscriptionEndDate < currentDate) {
+    if(decodedUser.role === Roles.User && subscriptionEndDate < currentDate){
       throw new BadRequestException('Your subscription has expired');
     }
-    const decodedUser = this.jwtService.decode(token);
     const clientId = decodedUser.id
     const productId = createPaymentDto.productId
-    const external = `${slug}`
+    const external = slug
 
-    console.log(decodedUser);
-    
-    
     if(decodedUser.role === Roles.Admin) {
       const client = new MercadoPagoConfig({
         accessToken: MERCADOPAGO_ACCESS_TOKEN
@@ -64,7 +61,7 @@ export class PaymentsService {
           external_reference: external,
           back_urls: {
             success: 'http://localhost:3000/payments/successGyms',
-            failure: `http://localhost:5173/${slug}`,
+            failure: `http://localhost:5173/${slug}/home`,
             pending: 'http://localhost:3000/pending'
           },
           auto_return: 'approved'
@@ -113,7 +110,7 @@ export class PaymentsService {
         external_reference: external,
         back_urls: {
           success: 'http://localhost:3000/payments/success',
-          failure: `http://localhost:5173/${slug}`,
+          failure: `http://localhost:5173/${slug}/home`,
           pending: 'http://localhost:3000/pending'
         },
         auto_return: 'approved'
@@ -127,7 +124,7 @@ export class PaymentsService {
   }
 
   async handlePaymentSuccess(externalReference: string, paymentId: string) {
-    const gymSlug = externalReference.split('/')[0]
+    const gymSlug = externalReference
     const payload = {
       slug: gymSlug
     }
@@ -156,7 +153,7 @@ export class PaymentsService {
       await this.transactionsService.create({
         clientId: clientId,
         productId: productId,
-        paymentType: 'mercado_pago',
+        paymentType: 'Mercado Pago',
         paymentId: paymentId,
         amount: totalPaidAmount,
         netAmount: netReceivedAmount,
@@ -190,7 +187,7 @@ export class PaymentsService {
   }
 
   async handlePaymentSuccessGyms(externalReference: string, paymentId: string) {
-    const gymSlug = externalReference.split('/')[0]
+    const gymSlug = externalReference
     const payload = {
       slug: gymSlug
     }
@@ -219,7 +216,7 @@ export class PaymentsService {
       await this.transactionsService.create({
         clientId: clientId,
         productId: productId,
-        paymentType: 'mercado_pago',
+        paymentType: 'Mercado Pago',
         paymentId: paymentId,
         amount: totalPaidAmount,
         netAmount: netReceivedAmount,

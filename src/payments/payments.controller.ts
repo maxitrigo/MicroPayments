@@ -42,7 +42,7 @@ export class PaymentsController {
 
     const success = await this.paymentsService.handlePaymentSuccess(externalReference, paymentId);
 
-    const redirecUrl = `http://localhost:5173/${success.slug}`
+    const redirecUrl = `http://localhost:5173/${success.slug}/subscriptions`
     res.redirect(redirecUrl);
 
   }
@@ -65,7 +65,7 @@ export class PaymentsController {
 
     const success = await this.paymentsService.handlePaymentSuccessGyms(externalReference, paymentId);
 
-    const redirecUrl = `http://localhost:5173/${success.slug}`
+    const redirecUrl = `http://localhost:5173/${success.slug}/subscriptions`
     res.redirect(redirecUrl);
 
   }
