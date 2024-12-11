@@ -17,6 +17,10 @@ export class CreateTransactionDto {
     @IsString()
     paymentType: string;
 
+    @ApiProperty({ example: 'admin' })
+    @IsString()
+    role: string;
+
     @ApiProperty({ example: '1kjb123nk23' })
     @IsString()
     paymentId: string;

@@ -10,6 +10,9 @@ export class Transactions {
     clientId: string;
 
     @Column()
+    role: string
+
+    @Column()
     productId: string;
 
     @Column()
