@@ -25,7 +25,7 @@ export class TransactionsService {
     const currentDate = new Date()
     const subscriptionEndDate = new Date(decodedGym.subscriptionEnd)
     if (subscriptionEndDate < currentDate) {
-      throw new BadRequestException('Your subscription has expired');
+      throw new BadRequestException('Your subscription has expired.');
     }
     return await this.transactionsRepository.findByGymId(gymId);
   }
