@@ -16,7 +16,7 @@ export class TransactionsController {
 
   @Post()
   @UseGuards(AdminGuard)
-  @ApiOperation({ summary: 'Create a transaction' })
+  @ApiOperation({ summary: 'Create a transaction.' })
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Forbidden.' })
   @ApiBearerAuth()
