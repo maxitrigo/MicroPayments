@@ -59,7 +59,7 @@ jobs:
             cd micropayments
 
             # Guardar el archivo .env en la carpeta yochambeoback
-            echo "${{ secrets.ENV_FILE }}" > ~/micopayments/.env
+            echo "${{ secrets.ENV_FILE }}" > ~/micropayments/.env
 
             echo "Deteniendo dockers activos..."
             docker-compose down
