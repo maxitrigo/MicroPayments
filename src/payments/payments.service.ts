@@ -157,7 +157,8 @@ export class PaymentsService {
         paymentId: paymentId,
         amount: totalPaidAmount,
         netAmount: netReceivedAmount,
-        gymId: decodedGym.id
+        gymId: decodedGym.id,
+        role: 'user'
       })
 
     }
@@ -220,7 +221,8 @@ export class PaymentsService {
         paymentId: paymentId,
         amount: totalPaidAmount,
         netAmount: netReceivedAmount,
-        gymId: decodedGym.id
+        gymId: decodedGym.id,
+        role: 'user'
       })
 
     }
