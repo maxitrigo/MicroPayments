@@ -16,7 +16,7 @@ export class PaymentsController {
   @Post('subscriptions')
   @UseGuards(AuthGuard)
   @ApiOperation({summary: 'Create payment'})
-  @ApiResponse({status: 201, description: 'Payment created'})
+  @ApiResponse({status: 201, description: 'Payment created.'})
   @ApiResponse({status: 400, description: 'Bad Request'})
   @ApiBearerAuth()
   create(@Body('payment') createPaymentDto: CreatePaymentDto,@Headers('authorization') headers: string, @Body('gymToken') gymToken: string, @Body('slug') slug: string) {
