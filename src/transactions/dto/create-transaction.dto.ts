@@ -33,7 +33,7 @@ export class CreateTransactionDto {
     @IsString()
     netAmount: number;
 
-    @ApiProperty({ example: '312308-1234-1234-1234' })
+    @ApiProperty({ example: '312308-1234-1234-1234.' })
     @IsString()
     gymId: string
 }
