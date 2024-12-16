@@ -60,9 +60,9 @@ export class PaymentsService {
           },
           external_reference: external,
           back_urls: {
-            success: 'http://localhost:3000/payments/successGyms',
-            failure: `http://localhost:5173/${slug}/home`,
-            pending: 'http://localhost:3000/pending'
+            success: 'https://tr.gym-metrics.com/payments/successGyms',
+            failure: `https://gym-metrics.com/${slug}/home`,
+            pending: `https://gym-metrics.com/${slug}/home`
           },
           auto_return: 'approved'
         }
@@ -109,9 +109,9 @@ export class PaymentsService {
         },
         external_reference: external,
         back_urls: {
-          success: 'http://localhost:3000/payments/success',
-          failure: `http://localhost:5173/${slug}/home`,
-          pending: 'http://localhost:3000/pending'
+          success: 'https://tr.gym-metrics.com/payments/successGyms',
+          failure: `https://gym-metrics.com/${slug}/home`,
+          pending: `https://gym-metrics.com/${slug}/home`
         },
         auto_return: 'approved'
       }
@@ -130,7 +130,7 @@ export class PaymentsService {
     }
     const token = this.jwtService.sign(payload)
 
-    const GYM = await axios.get(`http://localhost:3005/gyms/${gymSlug}`,
+    const GYM = await axios.get(`https://gym.gym-metrics.com/gyms/${gymSlug}`,
       {
         headers: {
           authorization: `Bearer ${token}`
@@ -169,7 +169,7 @@ export class PaymentsService {
       role: 'admin'
     })
     const updateUser = await axios.post(
-      `http://localhost:3005/users/update-subscription`,
+      `https://gym.gym-metrics.com/users/update-subscription`,
       {},
       {
         headers: {
@@ -194,7 +194,7 @@ export class PaymentsService {
     }
     const token = this.jwtService.sign(payload)
 
-    const GYM = await axios.get(`http://localhost:3005/gyms/${gymSlug}`,
+    const GYM = await axios.get(`https://gym.gym-metrics.com/gyms/${gymSlug}`,
       {
         headers: {
           authorization: `Bearer ${token}`
@@ -234,7 +234,7 @@ export class PaymentsService {
       role: 'admin'
     })
     const updateUser = await axios.post(
-      `http://localhost:3005/gyms/extend-subscription`,
+      `https://gym.gym-metrics.com/gyms/extend-subscription`,
       {},
       {
         headers: {
