@@ -109,7 +109,7 @@ export class PaymentsService {
         },
         external_reference: external,
         back_urls: {
-          success: 'https://tr.gym-metrics.com/payments/successGyms',
+          success: 'https://tr.gym-metrics.com/payments/success',
           failure: `https://gym-metrics.com/${slug}/home`,
           pending: `https://gym-metrics.com/${slug}/home`
         },
