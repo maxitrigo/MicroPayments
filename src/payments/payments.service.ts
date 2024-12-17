@@ -194,7 +194,7 @@ export class PaymentsService {
     }
     const token = this.jwtService.sign(payload)
 
-    const GYM = await axios.get(`https://gym.gym-metrics.com/gyms/${gymSlug}`,
+    const GYM = await axios.get(`https://gym.gym-metrics.com/gyms/default`,
       {
         headers: {
           authorization: `Bearer ${token}`
