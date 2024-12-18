@@ -40,7 +40,7 @@ export class TransactionsController {
   @Get(':gymToken')
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get all transactions' })
-  @ApiResponse({ status: 201, description: 'Transactions successfully retrieved.' })
+  @ApiResponse({ status: 201, description: 'Transactions successfully retrieved!.' })
   @ApiResponse({ status: 400, description: 'Forbidden.' })
   findByGymId(@Param('gymToken') gymToken: string,@Headers('authorization') headers: string) {
     return this.transactionsService.findByGymId(gymToken);
